@@ -326,55 +326,82 @@
             }
 
             async loadPhotos() {
-                // Questa funzione cerca automaticamente i file JPG nella directory
-                const response = await fetch('.');
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // Estrae i link ai file JPG dalla pagina di directory
-                const links = doc.querySelectorAll('a[href$=".jpg"], a[href$=".JPG"], a[href$=".jpeg"], a[href$=".JPEG"]');
-                
-                if (links.length === 0) {
-                    // Se non trova file attraverso il parsing, prova con una lista predefinita
-                    // Puoi sostituire questo con i nomi effettivi delle tue foto
-                    for (let i = 1; i <= 240; i++) {
-                        const fileName = `IMG_${i.toString().padStart(4, '0')}.jpg`;
-                        try {
-                            const response = await fetch(fileName, { method: 'HEAD' });
-                            if (response.ok) {
-                                this.photos.push(fileName);
+                try {
+                    // Legge il file list.txt che contiene l'elenco dei file
+                    const response = await fetch('list.txt');
+                    if (!response.ok) {
+                        throw new Error('File list.txt non trovato');
+                    }
+                    
+                    const fileList = await response.text();
+                    
+                    // Divide il contenuto in righe e filtra solo i file immagine
+                    const allFiles = fileList.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                    
+                    // Filtra solo i file immagine (JPG, JPEG, PNG, GIF, WEBP)
+                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
+                    
+                    this.photos = allFiles.filter(fileName => {
+                        // Esclude i file di sistema
+                        if (fileName === 'index.htm' || fileName === 'index.html' || fileName === 'list.txt') {
+                            return false;
+                        }
+                        
+                        // Controlla se ha un'estensione di immagine
+                        return imageExtensions.some(ext => fileName.endsWith(ext));
+                    });
+                    
+                    // Ordina i file alfabeticamente
+                    this.photos.sort();
+                    
+                    if (this.photos.length === 0) {
+                        throw new Error('Nessun file immagine trovato in list.txt');
+                    }
+                    
+                    console.log(`Trovate ${this.photos.length} foto:`, this.photos.slice(0, 5));
+                    
+                } catch (error) {
+                    console.error('Errore nel caricamento del file list.txt:', error);
+                    
+                    // Fallback: prova alcuni nomi comuni se list.txt non esiste
+                    const fallbackNames = [];
+                    
+                    // Prova pattern comuni
+                    const patterns = [
+                        { prefix: 'IMG_', start: 1, end: 50, digits: 4, extensions: ['.JPG', '.jpg'] },
+                        { prefix: 'DSC_', start: 1, end: 50, digits: 4, extensions: ['.JPG', '.jpg'] },
+                        { prefix: 'photo', start: 1, end: 50, digits: 0, extensions: ['.jpg', '.JPG'] },
+                    ];
+
+                    for (const pattern of patterns) {
+                        for (const ext of pattern.extensions) {
+                            for (let i = pattern.start; i <= pattern.end; i++) {
+                                const number = pattern.digits > 0 ? i.toString().padStart(pattern.digits, '0') : i.toString();
+                                fallbackNames.push(pattern.prefix + number + ext);
                             }
-                        } catch (e) {
-                            // File non trovato, continua
                         }
                     }
-                } else {
-                    this.photos = Array.from(links).map(link => link.getAttribute('href'));
-                }
 
-                // Se ancora non ha trovato foto, usa nomi comuni
-                if (this.photos.length === 0) {
-                    const commonNames = [
-                        'DSC_0001.jpg', 'DSC_0002.jpg', 'DSC_0003.jpg',
-                        'IMG_0001.jpg', 'IMG_0002.jpg', 'IMG_0003.jpg',
-                        'photo1.jpg', 'photo2.jpg', 'photo3.jpg'
-                    ];
-                    
-                    for (const name of commonNames) {
+                    // Verifica quali file esistono
+                    const existingPhotos = [];
+                    for (const photoName of fallbackNames) {
                         try {
-                            const response = await fetch(name, { method: 'HEAD' });
-                            if (response.ok) {
-                                this.photos.push(name);
+                            const testResponse = await fetch(photoName, { method: 'HEAD' });
+                            if (testResponse.ok) {
+                                existingPhotos.push(photoName);
                             }
                         } catch (e) {
                             // File non trovato
                         }
                     }
-                }
 
-                if (this.photos.length === 0) {
-                    throw new Error('Nessuna foto trovata nella directory');
+                    this.photos = existingPhotos;
+                    
+                    if (this.photos.length === 0) {
+                        throw new Error('Nessuna foto trovata. Assicurati di avere il file list.txt nella directory o file immagine con nomi standard.');
+                    }
                 }
             }
 
