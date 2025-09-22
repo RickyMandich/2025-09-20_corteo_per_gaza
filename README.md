@@ -4,8 +4,7 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 
 ## 🚀 Caratteristiche
 
-- **🔄 Rilevamento automatico**: Trova automaticamente tutte le cartelle con foto
-- **📁 Zero configurazione**: Nessun file da modificare manualmente
+- **📁 Configurazione semplice**: Lista cartelle in un solo punto
 - **🖼️ Nome file visibile**: Mostra il nome di ogni foto
 - **⬇️ Download integrato**: Pulsante per scaricare ogni foto
 - **📱 Touch ottimizzato**: Zoom e swipe perfetti su mobile
@@ -30,7 +29,7 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 
 ## 🛠️ Come Usare
 
-### 1. Aggiungere una Nuova Galleria (Semplicissimo!)
+### 1. Aggiungere una Nuova Galleria
 
 1. **Crea una cartella** con le tue foto JPG
 2. **Genera list.txt** con un comando:
@@ -38,9 +37,14 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
    cd "nome-cartella-foto"
    ls *.JPG > list.txt
    ```
-3. **Push su GitHub** - Fine! 🎉
-
-**Il sistema rileva automaticamente** tutte le cartelle che hanno `list.txt` e le mostra nell'index principale. Nessuna configurazione manuale necessaria!
+3. **Aggiungi la cartella** alla lista in `index.html`:
+   ```javascript
+   const galleryFolders = [
+       '2025-09-20 corteo per gaza (blocco della vempa) filtrato',
+       'nome-nuova-cartella', // ← Aggiungi qui
+   ];
+   ```
+4. **Push su GitHub** - Fine! 🎉
 
 ### 2. Visualizzare le Gallerie
 
@@ -73,10 +77,10 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
    ```
 4. **Push su GitHub** - Il deploy e rilevamento sono automatici!
 
-### Vantaggi del Sistema Automatico
+### Vantaggi del Sistema
 
-- ✅ **Zero configurazione** - Nessun file da modificare
-- ✅ **Rilevamento automatico** - Trova tutte le cartelle con foto
+- ✅ **Configurazione semplice** - Una sola lista da aggiornare
+- ✅ **Performance ottimale** - Nessuna ricerca automatica lenta
 - ✅ **Deploy istantaneo** - Push e il sito si aggiorna
 - ✅ **Hosting gratuito** con GitHub Pages
 - ✅ **Backup automatico** su cloud
@@ -174,12 +178,12 @@ Prima del deploy su GitHub, puoi testare tutto in locale:
 
 ### Rispetto alla Versione Precedente
 
-1. **🔄 Rilevamento automatico**: Zero configurazione manuale
+1. **📁 Configurazione semplice**: Una lista facile da aggiornare
 2. **🏷️ Nome file visibile**: Ogni foto mostra il suo nome
 3. **⬇️ Download integrato**: Pulsante per scaricare ogni foto
 4. **📱 Touch perfetto**: Zoom senza cambiare foto accidentalmente
 5. **🖼️ Foto verticali**: Visualizzazione completa senza ritaglio
-6. **⚡ Performance**: Caricamento lazy e transizioni fluide
+6. **⚡ Performance**: Caricamento veloce e ottimizzato
 
 ## 🎯 Workflow Finale
 
@@ -195,13 +199,16 @@ mkdir "2025-09-22 nuovo evento filtrato"
 cd "2025-09-22 nuovo evento filtrato"
 ls *.JPG > list.txt
 
-# 3. Push - tutto il resto è automatico!
+# 3. Aggiungi alla lista in index.html
+# Modifica la sezione galleryFolders
+
+# 4. Push!
 git add .
 git commit -m "Nuova galleria"
 git push
 ```
 
-**Il sistema rileva automaticamente la nuova cartella e la mostra nell'index!** 🚀📸
+**Semplice, veloce e affidabile!** 🚀📸
 
 ## 📄 Licenza
 

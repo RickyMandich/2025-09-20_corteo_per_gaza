@@ -252,59 +252,30 @@
             }
 
             async discoverFolders() {
-                // Strategia: prova pattern comuni per nomi di cartelle
-                const patterns = [];
+                // ⚠️ CONFIGURAZIONE CARTELLE ⚠️
+                // Aggiungi qui i nomi delle tue cartelle foto:
+                const galleryFolders = [
+                    '2025-09-20 corteo per gaza (blocco della vempa) filtrato',
+                    // Aggiungi nuove cartelle qui sotto:
+                    // '2025-09-22 nuovo evento filtrato',
+                    // '2025-09-25 festa compleanno filtrato',
+                ];
 
-                // Pattern per date (ultimi 2 anni)
-                const currentYear = new Date().getFullYear();
-                for (let year = currentYear - 1; year <= currentYear + 1; year++) {
-                    for (let month = 1; month <= 12; month++) {
-                        for (let day = 1; day <= 31; day++) {
-                            const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const foundFolders = [];
 
-                            // Pattern comuni
-                            patterns.push(
-                                `${dateStr} corteo per gaza (blocco della vempa) filtrato`,
-                                `${dateStr} evento filtrato`,
-                                `${dateStr} festa filtrato`,
-                                `${dateStr} manifestazione filtrato`,
-                                `${dateStr} concerto filtrato`,
-                                `${dateStr} viaggio filtrato`,
-                                `${dateStr} filtrato`,
-                                dateStr
-                            );
+                // Controlla ogni cartella configurata
+                for (const folder of galleryFolders) {
+                    try {
+                        const response = await fetch(`${folder}/list.txt`, { method: 'HEAD' });
+                        if (response.ok) {
+                            foundFolders.push(folder);
                         }
+                    } catch (error) {
+                        console.log(`Cartella ${folder} non trovata o senza list.txt`);
                     }
                 }
 
-                // Pattern generici
-                const genericPatterns = [
-                    'foto', 'galleria', 'immagini', 'pictures', 'gallery', 'photos',
-                    'eventi', 'events', 'vacanze', 'holidays', 'famiglia', 'family',
-                    'lavoro', 'work', 'progetti', 'projects'
-                ];
-                patterns.push(...genericPatterns);
-
-                // Testa in batch per performance
-                const foundFolders = [];
-                const batchSize = 20;
-
-                for (let i = 0; i < patterns.length; i += batchSize) {
-                    const batch = patterns.slice(i, i + batchSize);
-                    const promises = batch.map(async (folder) => {
-                        try {
-                            const response = await fetch(`${folder}/list.txt`, { method: 'HEAD' });
-                            return response.ok ? folder : null;
-                        } catch {
-                            return null;
-                        }
-                    });
-
-                    const results = await Promise.all(promises);
-                    foundFolders.push(...results.filter(f => f !== null));
-                }
-
-                return [...new Set(foundFolders)]; // Rimuovi duplicati
+                return foundFolders;
             }
 
             formatDisplayName(dirName) {
