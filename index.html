@@ -144,6 +144,35 @@
             opacity: 0.5;
         }
 
+        #downloadAllBtn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #downloadAllBtn:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        #downloadAllBtn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .download-progress {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #adb5bd;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
@@ -160,6 +189,11 @@
 
             .gallery-icon {
                 font-size: 3rem;
+            }
+
+            #downloadAllBtn {
+                padding: 10px 20px;
+                font-size: 14px;
             }
         }
 
@@ -186,6 +220,11 @@
                 Le Mie Gallerie Fotografiche
             </h1>
             <p>Esplora le collezioni di foto organizzate per evento</p>
+
+            <button id="downloadAllBtn" class="btn btn-success btn-lg mt-3" style="display: none;">
+                <i class="fas fa-download me-2"></i>
+                <span id="downloadAllText">Scarica Tutte le Foto (ZIP)</span>
+            </button>
         </div>
 
         <!-- Loading -->
@@ -208,6 +247,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         class GalleryIndex {
             constructor() {
@@ -220,6 +260,7 @@
                     await this.loadGalleries();
                     this.renderGalleries();
                     this.hideLoading();
+                    this.setupDownloadAll();
                 } catch (error) {
                     console.error('Errore durante il caricamento:', error);
                     this.showNoGalleries();
@@ -363,6 +404,96 @@
             showNoGalleries() {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('noGalleries').style.display = 'block';
+            }
+
+            setupDownloadAll() {
+                if (this.galleries.length > 0) {
+                    const downloadBtn = document.getElementById('downloadAllBtn');
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.addEventListener('click', () => this.downloadAllPhotos());
+                }
+            }
+
+            async downloadAllPhotos() {
+                const downloadBtn = document.getElementById('downloadAllBtn');
+                const downloadText = document.getElementById('downloadAllText');
+
+                // Disabilita il pulsante
+                downloadBtn.disabled = true;
+                downloadText.textContent = 'Preparazione download...';
+
+                try {
+                    const zip = new JSZip();
+                    let totalPhotos = 0;
+                    let processedPhotos = 0;
+
+                    // Conta il totale delle foto
+                    for (const gallery of this.galleries) {
+                        totalPhotos += gallery.photoCount;
+                    }
+
+                    // Aggiungi le foto al ZIP
+                    for (const gallery of this.galleries) {
+                        const folderName = gallery.name.replace(/[<>:"/\\|?*]/g, '_'); // Sanitizza nome cartella
+                        const galleryFolder = zip.folder(folderName);
+
+                        // Carica la lista delle foto
+                        const response = await fetch(`${gallery.path}/list.txt`);
+                        const listText = await response.text();
+                        const photoFiles = listText.trim().split('\n').filter(file => file.trim());
+
+                        // Scarica ogni foto
+                        for (const photoFile of photoFiles) {
+                            try {
+                                downloadText.textContent = `Scaricando ${processedPhotos + 1}/${totalPhotos} foto...`;
+
+                                const photoResponse = await fetch(`${gallery.path}/${photoFile.trim()}`);
+                                const photoBlob = await photoResponse.blob();
+
+                                galleryFolder.file(photoFile.trim(), photoBlob);
+                                processedPhotos++;
+
+                                // Aggiorna progresso
+                                const progress = Math.round((processedPhotos / totalPhotos) * 100);
+                                downloadText.textContent = `Scaricando ${processedPhotos}/${totalPhotos} foto (${progress}%)...`;
+
+                            } catch (error) {
+                                console.error(`Errore scaricando ${photoFile}:`, error);
+                            }
+                        }
+                    }
+
+                    // Genera e scarica il ZIP
+                    downloadText.textContent = 'Creazione file ZIP...';
+                    const zipBlob = await zip.generateAsync({type: 'blob'});
+
+                    // Crea link per download
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(zipBlob);
+                    link.download = 'Tutte_le_Foto.zip';
+                    link.style.display = 'none';
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Feedback successo
+                    downloadText.innerHTML = '<i class="fas fa-check me-2"></i>Download completato!';
+
+                    setTimeout(() => {
+                        downloadText.textContent = 'Scarica Tutte le Foto (ZIP)';
+                        downloadBtn.disabled = false;
+                    }, 3000);
+
+                } catch (error) {
+                    console.error('Errore durante il download:', error);
+                    downloadText.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Errore nel download';
+
+                    setTimeout(() => {
+                        downloadText.textContent = 'Scarica Tutte le Foto (ZIP)';
+                        downloadBtn.disabled = false;
+                    }, 3000);
+                }
             }
         }
 
