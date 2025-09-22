@@ -3,205 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galleria Foto</title>
+    <title>Gallerie Fotografiche</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
         }
 
         .main-container {
-            padding: 20px 0;
+            padding: 40px 0;
         }
 
-        .view-toggle {
-            margin-bottom: 30px;
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
         }
 
-        .btn-toggle {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            margin: 0 10px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .btn-toggle.active {
-            background: #007bff;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
         }
 
-        /* Stili Carosello */
-        .carousel-container {
-            position: relative;
-            height: 70vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
-            padding: 0 60px;
-        }
-
-        .carousel-track {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 800px;
-        }
-
-        .carousel-item {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: min(350px, 70vw);
-            height: min(260px, 52vw);
-            border-radius: 15px;
-            overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .carousel-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 15px;
-        }
-
-        .carousel-item.active {
-            z-index: 3;
-            transform: translate(-50%, -50%) scale(1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-        }
-
-        .carousel-item.prev {
-            z-index: 2;
-            transform: translate(calc(-50% - 160px), -50%) scale(0.75);
-            opacity: 0.5;
-        }
-
-        .carousel-item.next {
-            z-index: 2;
-            transform: translate(calc(-50% + 160px), -50%) scale(0.75);
-            opacity: 0.5;
-        }
-
-        .carousel-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-
-        .carousel-nav:hover {
-            background: #007bff;
-            color: white;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .carousel-nav.prev {
-            left: 20px;
-        }
-
-        .carousel-nav.next {
-            right: 20px;
-        }
-
-        .carousel-indicators {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .indicator.active {
-            background: #007bff;
-            transform: scale(1.2);
-        }
-
-        /* Stili Griglia */
-        .grid-container {
-            display: none;
-        }
-
-        .grid-container.active {
-            display: block;
-        }
-
-        .photo-grid {
+        .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
             padding: 20px 0;
         }
 
-        .grid-item {
-            position: relative;
-            aspect-ratio: 4/3;
-            border-radius: 15px;
-            overflow: hidden;
+        .gallery-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .grid-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-
-        .grid-item img {
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
         }
 
-        .grid-item:hover img {
-            transform: scale(1.05);
+        .gallery-card:hover::before {
+            left: 100%;
         }
 
-        .photo-counter {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
+        .gallery-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .gallery-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+
+        .gallery-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
+        }
+
+        .gallery-description {
+            opacity: 0.8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .gallery-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
 
         .loading {
@@ -217,450 +132,272 @@
             margin-right: 15px;
         }
 
-        /* Responsive */
+        .no-galleries {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .no-galleries i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
         @media (max-width: 768px) {
-            .carousel-container {
-                height: 60vh;
-                padding: 0 40px;
+            .header h1 {
+                font-size: 2.5rem;
             }
 
-            .carousel-item {
-                width: min(280px, 65vw);
-                height: min(210px, 49vw);
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
 
-            .carousel-item.prev {
-                transform: translate(calc(-50% - 120px), -50%) scale(0.65);
-            }
-            
-            .carousel-item.next {
-                transform: translate(calc(-50% + 120px), -50%) scale(0.65);
+            .gallery-card {
+                padding: 25px;
             }
 
-            .carousel-nav {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-
-            .carousel-nav.prev {
-                left: 10px;
-            }
-
-            .carousel-nav.next {
-                right: 10px;
-            }
-
-            .photo-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }
-
-            .photo-counter {
-                top: 10px;
-                right: 10px;
-                padding: 6px 12px;
-                font-size: 12px;
+            .gallery-icon {
+                font-size: 3rem;
             }
         }
 
         @media (max-width: 480px) {
-            .carousel-container {
-                padding: 0 30px;
+            .header h1 {
+                font-size: 2rem;
             }
 
-            .carousel-item {
-                width: min(240px, 60vw);
-                height: min(180px, 45vw);
+            .gallery-card {
+                padding: 20px;
             }
 
-            .carousel-item.prev {
-                transform: translate(calc(-50% - 90px), -50%) scale(0.6);
-                opacity: 0.4;
-            }
-            
-            .carousel-item.next {
-                transform: translate(calc(-50% + 90px), -50%) scale(0.6);
-                opacity: 0.4;
-            }
-
-            .btn-toggle {
-                padding: 8px 20px;
-                font-size: 14px;
-            }
-
-            .carousel-nav {
-                width: 35px;
-                height: 35px;
-                font-size: 14px;
+            .gallery-title {
+                font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid main-container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="text-white mb-4">
-                    <i class="fas fa-camera-retro me-3"></i>
-                    La Mia Galleria Fotografica
-                </h1>
-                
-                <!-- Toggle View Buttons -->
-                <div class="view-toggle">
-                    <button class="btn btn-toggle active" id="carouselBtn">
-                        <i class="fas fa-play me-2"></i>Carosello
-                    </button>
-                    <button class="btn btn-toggle" id="gridBtn">
-                        <i class="fas fa-th me-2"></i>Griglia
-                    </button>
-                </div>
-            </div>
+    <div class="container main-container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-camera-retro me-3"></i>
+                Le Mie Gallerie Fotografiche
+            </h1>
+            <p>Esplora le collezioni di foto organizzate per evento</p>
         </div>
 
         <!-- Loading -->
         <div id="loading" class="loading">
             <div class="spinner-border text-light" role="status"></div>
-            Caricamento foto in corso...
+            Caricamento gallerie in corso...
         </div>
 
-        <!-- Carousel View -->
-        <div id="carouselView" class="carousel-container">
-            <div class="carousel-track" id="carouselTrack">
-                <!-- Le foto verranno inserite dinamicamente qui -->
-            </div>
-            
-            <button class="carousel-nav prev" id="prevBtn">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="carousel-nav next" id="nextBtn">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            
-            <div class="carousel-indicators" id="indicators">
-                <!-- Gli indicatori verranno inseriti dinamicamente qui -->
-            </div>
-
-            <div class="photo-counter" id="photoCounter">
-                1 / 0
-            </div>
+        <!-- Galleries Grid -->
+        <div id="galleriesGrid" class="gallery-grid" style="display: none;">
+            <!-- Le gallerie verranno inserite dinamicamente qui -->
         </div>
 
-        <!-- Grid View -->
-        <div id="gridView" class="grid-container">
-            <div class="container">
-                <div class="photo-grid" id="photoGrid">
-                    <!-- Le foto verranno inserite dinamicamente qui -->
-                </div>
-            </div>
+        <!-- No Galleries Message -->
+        <div id="noGalleries" class="no-galleries" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h3>Nessuna galleria trovata</h3>
+            <p>Non sono state trovate cartelle con foto nella directory corrente.</p>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        class PhotoGallery {
+        class GalleryIndex {
             constructor() {
-                this.photos = [];
-                this.currentIndex = 0;
-                this.isCarouselView = true;
-                this.autoPlayInterval = null;
-                this.touchStartX = 0;
-                this.touchEndX = 0;
-                
+                this.galleries = [];
                 this.init();
             }
 
             async init() {
                 try {
-                    await this.loadPhotos();
-                    this.setupEventListeners();
-                    this.renderCarousel();
-                    this.renderGrid();
-                    this.startAutoPlay();
+                    await this.loadGalleries();
+                    this.renderGalleries();
                     this.hideLoading();
                 } catch (error) {
-                    console.error('Errore durante l\'inizializzazione:', error);
-                    this.showError();
+                    console.error('Errore durante il caricamento:', error);
+                    this.showNoGalleries();
                 }
             }
 
-            async loadPhotos() {
+            async loadGalleries() {
+                // Rileva automaticamente tutte le cartelle con list.txt
+                const potentialFolders = await this.discoverFolders();
+
+                for (const dir of potentialFolders) {
+                    try {
+                        const photoCount = await this.countPhotosInDirectory(dir);
+                        if (photoCount > 0) {
+                            this.galleries.push({
+                                name: dir,
+                                displayName: this.formatDisplayName(dir),
+                                photoCount: photoCount,
+                                path: dir
+                            });
+                        }
+                    } catch (error) {
+                        console.log(`Errore nel controllare la directory ${dir}:`, error);
+                    }
+                }
+
+                if (this.galleries.length === 0) {
+                    throw new Error('Nessuna galleria trovata. Crea cartelle con foto e file list.txt');
+                }
+            }
+
+            async discoverFolders() {
+                // Strategia: prova pattern comuni per nomi di cartelle
+                const patterns = [];
+
+                // Pattern per date (ultimi 2 anni)
+                const currentYear = new Date().getFullYear();
+                for (let year = currentYear - 1; year <= currentYear + 1; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        for (let day = 1; day <= 31; day++) {
+                            const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+                            // Pattern comuni
+                            patterns.push(
+                                `${dateStr} corteo per gaza (blocco della vempa) filtrato`,
+                                `${dateStr} evento filtrato`,
+                                `${dateStr} festa filtrato`,
+                                `${dateStr} manifestazione filtrato`,
+                                `${dateStr} concerto filtrato`,
+                                `${dateStr} viaggio filtrato`,
+                                `${dateStr} filtrato`,
+                                dateStr
+                            );
+                        }
+                    }
+                }
+
+                // Pattern generici
+                const genericPatterns = [
+                    'foto', 'galleria', 'immagini', 'pictures', 'gallery', 'photos',
+                    'eventi', 'events', 'vacanze', 'holidays', 'famiglia', 'family',
+                    'lavoro', 'work', 'progetti', 'projects'
+                ];
+                patterns.push(...genericPatterns);
+
+                // Testa in batch per performance
+                const foundFolders = [];
+                const batchSize = 20;
+
+                for (let i = 0; i < patterns.length; i += batchSize) {
+                    const batch = patterns.slice(i, i + batchSize);
+                    const promises = batch.map(async (folder) => {
+                        try {
+                            const response = await fetch(`${folder}/list.txt`, { method: 'HEAD' });
+                            return response.ok ? folder : null;
+                        } catch {
+                            return null;
+                        }
+                    });
+
+                    const results = await Promise.all(promises);
+                    foundFolders.push(...results.filter(f => f !== null));
+                }
+
+                return [...new Set(foundFolders)]; // Rimuovi duplicati
+            }
+
+            formatDisplayName(dirName) {
+                return dirName
+                    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '') // Rimuove data
+                    .replace(/\s*filtrato\s*$/i, '') // Rimuove "filtrato"
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ') || 'Galleria Senza Nome';
+            }
+
+
+
+            async countPhotosInDirectory(dirPath) {
                 try {
-                    // Legge il file list.txt che contiene l'elenco dei file
-                    const response = await fetch('list.txt');
+                    const response = await fetch(`${dirPath}/list.txt`);
                     if (!response.ok) {
-                        throw new Error('File list.txt non trovato');
+                        return 0;
                     }
                     
                     const fileList = await response.text();
-                    
-                    // Divide il contenuto in righe e filtra solo i file immagine
-                    const allFiles = fileList.split('\n')
+                    const files = fileList.split('\n')
                         .map(line => line.trim())
                         .filter(line => line.length > 0);
                     
-                    // Filtra solo i file immagine (JPG, JPEG, PNG, GIF, WEBP)
-                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
-                    
-                    this.photos = allFiles.filter(fileName => {
-                        // Esclude i file di sistema
-                        if (fileName === 'index.htm' || fileName === 'index.html' || fileName === 'list.txt') {
+                    const excludeFiles = ['index.htm', 'index.html', 'list.txt'];
+                    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
+
+                    return files.filter(fileName => {
+                        if (excludeFiles.includes(fileName)) {
                             return false;
                         }
-                        
-                        // Controlla se ha un'estensione di immagine
-                        return imageExtensions.some(ext => fileName.endsWith(ext));
-                    });
-                    
-                    // Ordina i file alfabeticamente
-                    this.photos.sort();
-                    
-                    if (this.photos.length === 0) {
-                        throw new Error('Nessun file immagine trovato in list.txt');
-                    }
-                    
-                    console.log(`Trovate ${this.photos.length} foto:`, this.photos.slice(0, 5));
-                    
+                        return supportedExtensions.some(ext => fileName.endsWith(ext));
+                    }).length;
                 } catch (error) {
-                    console.error('Errore nel caricamento del file list.txt:', error);
-                    
-                    // Fallback: prova alcuni nomi comuni se list.txt non esiste
-                    const fallbackNames = [];
-                    
-                    // Prova pattern comuni
-                    const patterns = [
-                        { prefix: 'IMG_', start: 1, end: 50, digits: 4, extensions: ['.JPG', '.jpg'] },
-                        { prefix: 'DSC_', start: 1, end: 50, digits: 4, extensions: ['.JPG', '.jpg'] },
-                        { prefix: 'photo', start: 1, end: 50, digits: 0, extensions: ['.jpg', '.JPG'] },
-                    ];
-
-                    for (const pattern of patterns) {
-                        for (const ext of pattern.extensions) {
-                            for (let i = pattern.start; i <= pattern.end; i++) {
-                                const number = pattern.digits > 0 ? i.toString().padStart(pattern.digits, '0') : i.toString();
-                                fallbackNames.push(pattern.prefix + number + ext);
-                            }
-                        }
-                    }
-
-                    // Verifica quali file esistono
-                    const existingPhotos = [];
-                    for (const photoName of fallbackNames) {
-                        try {
-                            const testResponse = await fetch(photoName, { method: 'HEAD' });
-                            if (testResponse.ok) {
-                                existingPhotos.push(photoName);
-                            }
-                        } catch (e) {
-                            // File non trovato
-                        }
-                    }
-
-                    this.photos = existingPhotos;
-                    
-                    if (this.photos.length === 0) {
-                        throw new Error('Nessuna foto trovata. Assicurati di avere il file list.txt nella directory o file immagine con nomi standard.');
-                    }
+                    return 0;
                 }
             }
 
-            setupEventListeners() {
-                // Toggle view buttons
-                document.getElementById('carouselBtn').addEventListener('click', () => this.switchView('carousel'));
-                document.getElementById('gridBtn').addEventListener('click', () => this.switchView('grid'));
 
-                // Carousel navigation
-                document.getElementById('prevBtn').addEventListener('click', () => this.previousPhoto());
-                document.getElementById('nextBtn').addEventListener('click', () => this.nextPhoto());
 
-                // Touch events for mobile
-                const carouselTrack = document.getElementById('carouselTrack');
-                carouselTrack.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-                carouselTrack.addEventListener('touchend', (e) => this.handleTouchEnd(e));
-
-                // Keyboard navigation
-                document.addEventListener('keydown', (e) => {
-                    if (this.isCarouselView) {
-                        if (e.key === 'ArrowLeft') this.previousPhoto();
-                        if (e.key === 'ArrowRight') this.nextPhoto();
-                    }
-                });
-
-                // Pause auto-play on hover
-                const carouselContainer = document.getElementById('carouselView');
-                carouselContainer.addEventListener('mouseenter', () => this.stopAutoPlay());
-                carouselContainer.addEventListener('mouseleave', () => this.startAutoPlay());
-            }
-
-            switchView(view) {
-                const carouselBtn = document.getElementById('carouselBtn');
-                const gridBtn = document.getElementById('gridBtn');
-                const carouselView = document.getElementById('carouselView');
-                const gridView = document.getElementById('gridView');
-
-                if (view === 'carousel') {
-                    this.isCarouselView = true;
-                    carouselBtn.classList.add('active');
-                    gridBtn.classList.remove('active');
-                    carouselView.style.display = 'flex';
-                    gridView.classList.remove('active');
-                    this.startAutoPlay();
-                } else {
-                    this.isCarouselView = false;
-                    gridBtn.classList.add('active');
-                    carouselBtn.classList.remove('active');
-                    carouselView.style.display = 'none';
-                    gridView.classList.add('active');
-                    this.stopAutoPlay();
-                }
-            }
-
-            renderCarousel() {
-                const track = document.getElementById('carouselTrack');
-                const indicators = document.getElementById('indicators');
-                const counter = document.getElementById('photoCounter');
-
-                track.innerHTML = '';
-                indicators.innerHTML = '';
-
-                this.photos.forEach((photo, index) => {
-                    // Carousel items
-                    const item = document.createElement('div');
-                    item.className = 'carousel-item';
-                    item.innerHTML = `<img src="${photo}" alt="Foto ${index + 1}" loading="lazy">`;
-                    track.appendChild(item);
-
-                    // Indicators
-                    const indicator = document.createElement('div');
-                    indicator.className = 'indicator';
-                    indicator.addEventListener('click', () => this.goToPhoto(index));
-                    indicators.appendChild(indicator);
-                });
-
-                this.updateCarousel();
-                counter.textContent = `${this.currentIndex + 1} / ${this.photos.length}`;
-            }
-
-            renderGrid() {
-                const grid = document.getElementById('photoGrid');
+            renderGalleries() {
+                const grid = document.getElementById('galleriesGrid');
                 grid.innerHTML = '';
 
-                this.photos.forEach((photo, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'grid-item';
-                    item.innerHTML = `<img src="${photo}" alt="Foto ${index + 1}" loading="lazy">`;
-                    item.addEventListener('click', () => {
-                        this.currentIndex = index;
-                        this.switchView('carousel');
-                        this.updateCarousel();
-                    });
-                    grid.appendChild(item);
-                });
-            }
-
-            updateCarousel() {
-                const items = document.querySelectorAll('.carousel-item');
-                const indicators = document.querySelectorAll('.indicator');
-                const counter = document.getElementById('photoCounter');
-
-                items.forEach((item, index) => {
-                    item.className = 'carousel-item';
+                this.galleries.forEach(gallery => {
+                    const card = document.createElement('div');
+                    card.className = 'gallery-card';
+                    card.innerHTML = `
+                        <div class="gallery-icon">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <div class="gallery-title">${gallery.displayName}</div>
+                        <div class="gallery-description">
+                            Collezione fotografica con ${gallery.photoCount} immagini
+                        </div>
+                        <div class="gallery-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">${gallery.photoCount}</div>
+                                <div class="stat-label">Foto</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number"><i class="fas fa-eye"></i></div>
+                                <div class="stat-label">Visualizza</div>
+                            </div>
+                        </div>
+                    `;
                     
-                    if (index === this.currentIndex) {
-                        item.classList.add('active');
-                    } else if (index === this.getPrevIndex()) {
-                        item.classList.add('prev');
-                    } else if (index === this.getNextIndex()) {
-                        item.classList.add('next');
-                    }
+                    card.addEventListener('click', () => {
+                        window.location.href = `gallery.html?folder=${encodeURIComponent(gallery.path)}`;
+                    });
+                    
+                    grid.appendChild(card);
                 });
 
-                indicators.forEach((indicator, index) => {
-                    indicator.classList.toggle('active', index === this.currentIndex);
-                });
-
-                counter.textContent = `${this.currentIndex + 1} / ${this.photos.length}`;
-            }
-
-            getPrevIndex() {
-                return this.currentIndex === 0 ? this.photos.length - 1 : this.currentIndex - 1;
-            }
-
-            getNextIndex() {
-                return this.currentIndex === this.photos.length - 1 ? 0 : this.currentIndex + 1;
-            }
-
-            previousPhoto() {
-                this.currentIndex = this.getPrevIndex();
-                this.updateCarousel();
-            }
-
-            nextPhoto() {
-                this.currentIndex = this.getNextIndex();
-                this.updateCarousel();
-            }
-
-            goToPhoto(index) {
-                this.currentIndex = index;
-                this.updateCarousel();
-            }
-
-            startAutoPlay() {
-                if (this.isCarouselView && this.photos.length > 1) {
-                    this.autoPlayInterval = setInterval(() => {
-                        this.nextPhoto();
-                    }, 15000);
-                }
-            }
-
-            stopAutoPlay() {
-                if (this.autoPlayInterval) {
-                    clearInterval(this.autoPlayInterval);
-                    this.autoPlayInterval = null;
-                }
-            }
-
-            handleTouchStart(e) {
-                this.touchStartX = e.touches[0].clientX;
-            }
-
-            handleTouchEnd(e) {
-                this.touchEndX = e.changedTouches[0].clientX;
-                this.handleSwipe();
-            }
-
-            handleSwipe() {
-                const swipeThreshold = 50;
-                const diff = this.touchStartX - this.touchEndX;
-
-                if (Math.abs(diff) > swipeThreshold) {
-                    if (diff > 0) {
-                        this.nextPhoto();
-                    } else {
-                        this.previousPhoto();
-                    }
-                }
+                grid.style.display = 'grid';
             }
 
             hideLoading() {
                 document.getElementById('loading').style.display = 'none';
             }
 
-            showError() {
-                const loading = document.getElementById('loading');
-                loading.innerHTML = `
-                    <div class="text-center text-white">
-                        <i class="fas fa-exclamation-triangle mb-3" style="font-size: 48px;"></i>
-                        <h4>Nessuna foto trovata</h4>
-                        <p>Assicurati che ci siano file JPG nella stessa directory del file HTML</p>
-                    </div>
-                `;
+            showNoGalleries() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('noGalleries').style.display = 'block';
             }
         }
 
-        // Inizializza la galleria quando la pagina è caricata
+        // Inizializza l'index quando la pagina è caricata
         document.addEventListener('DOMContentLoaded', () => {
-            new PhotoGallery();
+            new GalleryIndex();
         });
     </script>
 </body>

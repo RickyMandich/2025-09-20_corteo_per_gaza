@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galleria Foto</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        .main-container {
+            padding: 20px 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .view-toggle {
+            margin-bottom: 30px;
+        }
+
+        .btn-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .btn-toggle.active {
+            background: #4fc3f7;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
+        }
+
+        /* Stili Carosello Migliorati */
+        .carousel-container {
+            position: relative;
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            padding: 0 60px;
+        }
+
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1000px;
+        }
+
+        .carousel-item {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: 90vw;
+            max-height: 75vh;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            touch-action: manipulation;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .carousel-item.active {
+            z-index: 3;
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .carousel-item.prev {
+            z-index: 2;
+            transform: translate(calc(-50% - 200px), -50%) scale(0.7);
+            opacity: 0.4;
+        }
+
+        .carousel-item.next {
+            z-index: 2;
+            transform: translate(calc(-50% + 200px), -50%) scale(0.7);
+            opacity: 0.4;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            color: white;
+        }
+
+        .carousel-nav:hover {
+            background: #4fc3f7;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-nav.prev {
+            left: 20px;
+        }
+
+        .carousel-nav.next {
+            right: 20px;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+            max-width: 80%;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .indicator.active {
+            background: #4fc3f7;
+            transform: scale(1.2);
+        }
+
+        /* Stili Griglia Migliorati */
+        .grid-container {
+            display: none;
+        }
+
+        .grid-container.active {
+            display: block;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .grid-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .photo-info {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 90%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+            word-break: break-all;
+        }
+
+        .download-btn {
+            background: #4fc3f7;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .download-btn:hover {
+            background: #29b6f6;
+            transform: scale(1.1);
+        }
+
+        .download-btn:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .spinner-border {
+            margin-right: 15px;
+        }
+
+        /* Responsive migliorato */
+        @media (max-width: 768px) {
+            .carousel-container {
+                height: 70vh;
+                padding: 0 40px;
+            }
+
+            .carousel-item {
+                max-width: 95vw;
+                max-height: 65vh;
+            }
+
+            .carousel-item.prev {
+                transform: translate(calc(-50% - 150px), -50%) scale(0.6);
+            }
+            
+            .carousel-item.next {
+                transform: translate(calc(-50% + 150px), -50%) scale(0.6);
+            }
+
+            .carousel-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .carousel-nav.prev {
+                left: 10px;
+            }
+
+            .carousel-nav.next {
+                right: 10px;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .photo-info {
+                bottom: 60px;
+                padding: 10px 20px;
+                gap: 10px;
+            }
+
+            .photo-name {
+                font-size: 14px;
+            }
+
+            .download-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-container {
+                padding: 0 30px;
+                height: 60vh;
+            }
+
+            .carousel-item {
+                max-width: 98vw;
+                max-height: 55vh;
+            }
+
+            .carousel-item.prev {
+                transform: translate(calc(-50% - 100px), -50%) scale(0.5);
+                opacity: 0.3;
+            }
+            
+            .carousel-item.next {
+                transform: translate(calc(-50% + 100px), -50%) scale(0.5);
+                opacity: 0.3;
+            }
+
+            .btn-toggle {
+                padding: 8px 20px;
+                font-size: 14px;
+            }
+
+            .carousel-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .photo-info {
+                bottom: 50px;
+                padding: 8px 15px;
+                gap: 8px;
+                max-width: 95%;
+            }
+
+            .photo-name {
+                font-size: 12px;
+            }
+
+            .download-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+        }
+
+        /* Zoom protection */
+        .carousel-item.zooming {
+            pointer-events: none;
+        }
+
+        .carousel-track.zoom-active {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='index.html'">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="container-fluid main-container">
+        <div class="row">
+            <div class="col-12 text-center header">
+                <h1 id="galleryTitle">
+                    <i class="fas fa-camera-retro me-3"></i>
+                    Galleria Fotografica
+                </h1>
+                
+                <!-- Toggle View Buttons -->
+                <div class="view-toggle">
+                    <button class="btn btn-toggle active" id="carouselBtn">
+                        <i class="fas fa-play me-2"></i>Carosello
+                    </button>
+                    <button class="btn btn-toggle" id="gridBtn">
+                        <i class="fas fa-th me-2"></i>Griglia
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner-border text-light" role="status"></div>
+            Caricamento foto in corso...
+        </div>
+
+        <!-- Carousel View -->
+        <div id="carouselView" class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+                <!-- Le foto verranno inserite dinamicamente qui -->
+            </div>
+            
+            <button class="carousel-nav prev" id="prevBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav next" id="nextBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="carousel-indicators" id="indicators">
+                <!-- Gli indicatori verranno inseriti dinamicamente qui -->
+            </div>
+
+            <div class="photo-counter" id="photoCounter">
+                1 / 0
+            </div>
+
+            <div class="photo-info" id="photoInfo">
+                <p class="photo-name" id="photoName">Nome foto</p>
+                <button class="download-btn" id="downloadBtn" title="Scarica foto">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="gridView" class="grid-container">
+            <div class="container">
+                <div class="photo-grid" id="photoGrid">
+                    <!-- Le foto verranno inserite dinamicamente qui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class PhotoGallery {
+            constructor() {
+                this.photos = [];
+                this.currentIndex = 0;
+                this.isCarouselView = true;
+                this.autoPlayInterval = null;
+                this.touchStartX = 0;
+                this.touchEndX = 0;
+                this.touchStartY = 0;
+                this.touchEndY = 0;
+                this.isZooming = false;
+                this.lastTouchDistance = 0;
+                this.folderPath = '';
+
+                this.init();
+            }
+
+            async init() {
+                try {
+                    this.getFolderFromURL();
+                    await this.loadPhotos();
+                    this.setupEventListeners();
+                    this.renderCarousel();
+                    this.renderGrid();
+                    this.startAutoPlay();
+                    this.hideLoading();
+                    this.updateTitle();
+                } catch (error) {
+                    console.error('Errore durante l\'inizializzazione:', error);
+                    this.showError();
+                }
+            }
+
+            getFolderFromURL() {
+                const urlParams = new URLSearchParams(window.location.search);
+                this.folderPath = urlParams.get('folder') || '';
+                if (!this.folderPath) {
+                    throw new Error('Parametro folder mancante nell\'URL');
+                }
+            }
+
+            updateTitle() {
+                const title = document.getElementById('galleryTitle');
+                const displayName = this.formatDisplayName(this.folderPath);
+                title.innerHTML = `<i class="fas fa-camera-retro me-3"></i>${displayName}`;
+                document.title = `${displayName} - Galleria Foto`;
+            }
+
+            formatDisplayName(dirName) {
+                return dirName
+                    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '')
+                    .replace(/\s*filtrato\s*$/i, '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            }
+
+            async loadPhotos() {
+                try {
+                    const response = await fetch(`${this.folderPath}/list.txt`);
+                    if (!response.ok) {
+                        throw new Error('File list.txt non trovato');
+                    }
+
+                    const fileList = await response.text();
+                    const allFiles = fileList.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+
+                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
+
+                    this.photos = allFiles.filter(fileName => {
+                        if (fileName === 'index.htm' || fileName === 'index.html' || fileName === 'list.txt') {
+                            return false;
+                        }
+                        return imageExtensions.some(ext => fileName.endsWith(ext));
+                    }).map(fileName => `${this.folderPath}/${fileName}`);
+
+                    this.photos.sort();
+
+                    if (this.photos.length === 0) {
+                        throw new Error('Nessun file immagine trovato');
+                    }
+
+                    console.log(`Trovate ${this.photos.length} foto`);
+
+                } catch (error) {
+                    console.error('Errore nel caricamento:', error);
+                    throw error;
+                }
+            }
+
+            setupEventListeners() {
+                // Toggle view buttons
+                document.getElementById('carouselBtn').addEventListener('click', () => this.switchView('carousel'));
+                document.getElementById('gridBtn').addEventListener('click', () => this.switchView('grid'));
+
+                // Carousel navigation
+                document.getElementById('prevBtn').addEventListener('click', () => this.previousPhoto());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextPhoto());
+
+                // Download button
+                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadCurrentPhoto());
+
+                // Touch events migliorati per mobile
+                const carouselTrack = document.getElementById('carouselTrack');
+                carouselTrack.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                carouselTrack.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                carouselTrack.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (this.isCarouselView && !this.isZooming) {
+                        if (e.key === 'ArrowLeft') this.previousPhoto();
+                        if (e.key === 'ArrowRight') this.nextPhoto();
+                    }
+                });
+
+                // Pause auto-play on hover
+                const carouselContainer = document.getElementById('carouselView');
+                carouselContainer.addEventListener('mouseenter', () => this.stopAutoPlay());
+                carouselContainer.addEventListener('mouseleave', () => this.startAutoPlay());
+            }
+
+            switchView(view) {
+                const carouselBtn = document.getElementById('carouselBtn');
+                const gridBtn = document.getElementById('gridBtn');
+                const carouselView = document.getElementById('carouselView');
+                const gridView = document.getElementById('gridView');
+
+                if (view === 'carousel') {
+                    this.isCarouselView = true;
+                    carouselBtn.classList.add('active');
+                    gridBtn.classList.remove('active');
+                    carouselView.style.display = 'flex';
+                    gridView.classList.remove('active');
+                    this.startAutoPlay();
+                } else {
+                    this.isCarouselView = false;
+                    gridBtn.classList.add('active');
+                    carouselBtn.classList.remove('active');
+                    carouselView.style.display = 'none';
+                    gridView.classList.add('active');
+                    this.stopAutoPlay();
+                }
+            }
+
+            renderCarousel() {
+                const track = document.getElementById('carouselTrack');
+                const indicators = document.getElementById('indicators');
+                const counter = document.getElementById('photoCounter');
+
+                track.innerHTML = '';
+                indicators.innerHTML = '';
+
+                this.photos.forEach((photo, index) => {
+                    // Carousel items
+                    const item = document.createElement('div');
+                    item.className = 'carousel-item';
+                    item.innerHTML = `<img src="${photo}" alt="Foto ${index + 1}" loading="lazy">`;
+                    track.appendChild(item);
+
+                    // Indicators
+                    const indicator = document.createElement('div');
+                    indicator.className = 'indicator';
+                    indicator.addEventListener('click', () => this.goToPhoto(index));
+                    indicators.appendChild(indicator);
+                });
+
+                this.updateCarousel();
+                counter.textContent = `${this.currentIndex + 1} / ${this.photos.length}`;
+
+                // Inizializza il nome della prima foto
+                this.updatePhotoInfo();
+            }
+
+            renderGrid() {
+                const grid = document.getElementById('photoGrid');
+                grid.innerHTML = '';
+
+                this.photos.forEach((photo, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'grid-item';
+                    item.innerHTML = `<img src="${photo}" alt="Foto ${index + 1}" loading="lazy">`;
+                    item.addEventListener('click', () => {
+                        this.currentIndex = index;
+                        this.switchView('carousel');
+                        this.updateCarousel();
+                    });
+                    grid.appendChild(item);
+                });
+            }
+
+            updateCarousel() {
+                const items = document.querySelectorAll('.carousel-item');
+                const indicators = document.querySelectorAll('.indicator');
+                const counter = document.getElementById('photoCounter');
+
+                items.forEach((item, index) => {
+                    item.className = 'carousel-item';
+
+                    if (index === this.currentIndex) {
+                        item.classList.add('active');
+                    } else if (index === this.getPrevIndex()) {
+                        item.classList.add('prev');
+                    } else if (index === this.getNextIndex()) {
+                        item.classList.add('next');
+                    }
+                });
+
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === this.currentIndex);
+                });
+
+                counter.textContent = `${this.currentIndex + 1} / ${this.photos.length}`;
+
+                // Aggiorna nome file
+                this.updatePhotoInfo();
+            }
+
+            updatePhotoInfo() {
+                const photoName = document.getElementById('photoName');
+                const currentPhoto = this.photos[this.currentIndex];
+
+                if (currentPhoto) {
+                    // Estrae solo il nome del file dal percorso completo
+                    const fileName = currentPhoto.split('/').pop();
+                    photoName.textContent = fileName;
+                }
+            }
+
+            downloadCurrentPhoto() {
+                const currentPhoto = this.photos[this.currentIndex];
+                if (!currentPhoto) return;
+
+                // Crea un link temporaneo per il download
+                const link = document.createElement('a');
+                link.href = currentPhoto;
+                link.download = currentPhoto.split('/').pop(); // Nome del file
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Feedback visivo
+                const downloadBtn = document.getElementById('downloadBtn');
+                const originalIcon = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<i class="fas fa-check"></i>';
+                downloadBtn.style.background = '#4caf50';
+
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalIcon;
+                    downloadBtn.style.background = '#4fc3f7';
+                }, 1500);
+            }
+
+            getPrevIndex() {
+                return this.currentIndex === 0 ? this.photos.length - 1 : this.currentIndex - 1;
+            }
+
+            getNextIndex() {
+                return this.currentIndex === this.photos.length - 1 ? 0 : this.currentIndex + 1;
+            }
+
+            previousPhoto() {
+                if (!this.isZooming) {
+                    this.currentIndex = this.getPrevIndex();
+                    this.updateCarousel();
+                }
+            }
+
+            nextPhoto() {
+                if (!this.isZooming) {
+                    this.currentIndex = this.getNextIndex();
+                    this.updateCarousel();
+                }
+            }
+
+            goToPhoto(index) {
+                if (!this.isZooming) {
+                    this.currentIndex = index;
+                    this.updateCarousel();
+                }
+            }
+
+            startAutoPlay() {
+                if (this.isCarouselView && this.photos.length > 1 && !this.isZooming) {
+                    this.autoPlayInterval = setInterval(() => {
+                        this.nextPhoto();
+                    }, 15000);
+                }
+            }
+
+            stopAutoPlay() {
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                    this.autoPlayInterval = null;
+                }
+            }
+
+            // Gestione touch migliorata per distinguere zoom da swipe
+            handleTouchStart(e) {
+                if (e.touches.length === 1) {
+                    // Single touch - possibile swipe
+                    this.touchStartX = e.touches[0].clientX;
+                    this.touchStartY = e.touches[0].clientY;
+                    this.isZooming = false;
+                } else if (e.touches.length === 2) {
+                    // Multi-touch - zoom
+                    this.isZooming = true;
+                    this.lastTouchDistance = this.getTouchDistance(e.touches[0], e.touches[1]);
+                    document.getElementById('carouselTrack').classList.add('zoom-active');
+
+                    // Ferma l'autoplay durante lo zoom
+                    this.stopAutoPlay();
+
+                    // Previeni il comportamento di default
+                    e.preventDefault();
+                }
+            }
+
+            handleTouchMove(e) {
+                if (e.touches.length === 2 && this.isZooming) {
+                    // Gestione zoom
+                    const currentDistance = this.getTouchDistance(e.touches[0], e.touches[1]);
+                    const scale = currentDistance / this.lastTouchDistance;
+
+                    // Previeni il comportamento di default durante lo zoom
+                    e.preventDefault();
+                } else if (e.touches.length === 1 && !this.isZooming) {
+                    // Calcola la distanza per determinare se è uno swipe intenzionale
+                    const deltaX = Math.abs(e.touches[0].clientX - this.touchStartX);
+                    const deltaY = Math.abs(e.touches[0].clientY - this.touchStartY);
+
+                    // Se il movimento orizzontale è maggiore di quello verticale, previeni lo scroll
+                    if (deltaX > deltaY && deltaX > 10) {
+                        e.preventDefault();
+                    }
+                }
+            }
+
+            handleTouchEnd(e) {
+                if (this.isZooming) {
+                    // Fine zoom
+                    this.isZooming = false;
+                    document.getElementById('carouselTrack').classList.remove('zoom-active');
+
+                    // Riavvia l'autoplay dopo un breve delay
+                    setTimeout(() => {
+                        if (this.isCarouselView) {
+                            this.startAutoPlay();
+                        }
+                    }, 1000);
+                } else if (e.changedTouches.length === 1) {
+                    // Fine swipe
+                    this.touchEndX = e.changedTouches[0].clientX;
+                    this.touchEndY = e.changedTouches[0].clientY;
+                    this.handleSwipe();
+                }
+            }
+
+            getTouchDistance(touch1, touch2) {
+                const dx = touch1.clientX - touch2.clientX;
+                const dy = touch1.clientY - touch2.clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            handleSwipe() {
+                const swipeThreshold = 50;
+                const deltaX = this.touchStartX - this.touchEndX;
+                const deltaY = Math.abs(this.touchStartY - this.touchEndY);
+
+                // Solo se il movimento orizzontale è maggiore di quello verticale
+                // e supera la soglia minima
+                if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > deltaY) {
+                    if (deltaX > 0) {
+                        this.nextPhoto();
+                    } else {
+                        this.previousPhoto();
+                    }
+                }
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            showError() {
+                const loading = document.getElementById('loading');
+                loading.innerHTML = `
+                    <div class="text-center text-white">
+                        <i class="fas fa-exclamation-triangle mb-3" style="font-size: 48px;"></i>
+                        <h4>Errore nel caricamento</h4>
+                        <p>Impossibile caricare le foto dalla cartella specificata</p>
+                        <button class="btn btn-outline-light mt-3" onclick="window.location.href='index.html'">
+                            <i class="fas fa-arrow-left me-2"></i>Torna all'indice
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Inizializza la galleria quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            new PhotoGallery();
+        });
+    </script>
+</body>
+</html>
