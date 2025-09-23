@@ -32,10 +32,10 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 ### 1. Aggiungere una Nuova Galleria
 
 1. **Crea una cartella** con le tue foto JPG
-2. **Genera list.txt** con un comando:
+2. **Genera photo.txt** con un comando:
    ```bash
    cd "nome-cartella-foto"
-   ls *.JPG > list.txt
+   ls *.JPG > photo.txt
    ```
 3. **Aggiungi la cartella** alla lista in `index.html`:
    ```javascript
@@ -45,6 +45,14 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
    ];
    ```
 4. **Push su GitHub** - Fine! 🎉
+
+### 1.1. Automatizzare con scan.sh
+
+Usa lo script `scan.sh` per automatizzare la generazione di `photo.txt` e `song.txt`:
+```bash
+chmod +x scan.sh
+./scan.sh
+```
 
 ### 2. Visualizzare le Gallerie
 
@@ -63,6 +71,7 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 - **⬇️ Download**: Pulsante per scaricare la foto corrente
 - **🔍 Zoom intelligente**: Su mobile, zoom senza cambiare foto
 - **📱 Touch perfetto**: Swipe fluido e preciso
+- **🎵 Audio di sottofondo**: Riproduzione casuale di musica dalla lista `song.txt`
 
 ## 🚀 Deployment su GitHub
 
@@ -70,10 +79,14 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 
 1. **Clona/Fork** questo repository
 2. **Aggiungi le tue foto** in cartelle separate
-3. **Genera list.txt** per ogni cartella:
+3. **Genera photo.txt** per ogni cartella:
    ```bash
    cd "cartella-foto"
-   ls *.JPG > list.txt
+   ls *.JPG > photo.txt
+   ```
+   Oppure usa lo script automatico:
+   ```bash
+   ./scan.sh
    ```
 4. **Push su GitHub** - Il deploy e rilevamento sono automatici!
 
@@ -88,9 +101,9 @@ Un sistema completamente automatico per visualizzare gallerie fotografiche. Bast
 
 ## 🔧 Configurazione
 
-### File list.txt
+### File photo.txt
 
-Il file `list.txt` deve contenere un nome di file per riga:
+Il file `photo.txt` deve contenere un nome di file per riga:
 
 ```
 IMGP5215.JPG
@@ -99,13 +112,37 @@ IMGP5217.JPG
 ...
 ```
 
+### Script scan.sh
+
+Lo script `scan.sh` automatizza la generazione di `photo.txt` e `song.txt`:
+
+```bash
+chmod +x scan.sh
+./scan.sh
+```
+
+Funzionalità:
+- 🔍 **Scansiona automaticamente** tutte le cartelle
+- 📝 **Genera photo.txt** con tutte le immagini trovate
+- 🎵 **Genera song.txt** con tutti i file audio trovati
+- 🔄 **Rinomina list.txt** in photo.txt automaticamente
+- 📊 **Mostra statistiche** complete
+
 ### Estensioni Supportate
 
+#### Immagini
 - `.jpg`, `.JPG`
 - `.jpeg`, `.JPEG`
 - `.png`, `.PNG`
 - `.gif`, `.GIF`
 - `.webp`, `.WEBP`
+
+#### Audio (per song.txt)
+- `.mp3`, `.MP3`
+- `.wav`, `.WAV`
+- `.ogg`, `.OGG`
+- `.m4a`, `.M4A`
+- `.aac`, `.AAC`
 
 ## 📱 Funzionalità Mobile
 
@@ -158,15 +195,85 @@ Prima del deploy su GitHub, puoi testare tutto in locale:
 
 ### Le foto non si caricano
 
-1. Verifica che il file `list.txt` esista nella cartella
-2. Controlla che i nomi dei file in `list.txt` corrispondano ai file reali
+1. Verifica che il file `photo.txt` esista nella cartella
+2. Controlla che i nomi dei file in `photo.txt` corrispondano ai file reali
 3. Assicurati che le estensioni siano supportate
 
 ### La cartella non appare nell'index
 
-1. Verifica che esista il file `list.txt` nella cartella
+1. Verifica che esista il file `photo.txt` nella cartella
 2. Controlla che il file contenga almeno un'immagine valida
-3. **Aspetta qualche secondo** - Il rilevamento è automatico ma può richiedere tempo
+3. **Aspetta qualche secondo** - Il rilevamento è automatico
+
+### L'audio non funziona
+
+1. Verifica che esista il file `song.txt` nella cartella
+2. Controlla che i nomi dei file audio in `song.txt` corrispondano ai file reali
+3. Assicurati che le estensioni audio siano supportate
+4. Su alcuni browser, l'audio richiede interazione utente (clicca play)
+
+## 🎵 Funzionalità Audio
+
+Per aggiungere musica di sottofondo alla tua gallery:
+
+1. **Aggiungi file audio** nella cartella della gallery
+2. **Crea `song.txt`** con l'elenco dei file audio (uno per riga)
+3. **Apri la gallery** - la musica inizierà automaticamente!
+
+Vedi [AUDIO_FEATURE.md](AUDIO_FEATURE.md) per dettagli completi.
+
+## 🔍 Script di Automazione
+
+### scan.sh - Generazione Automatica
+
+Lo script `scan.sh` automatizza completamente la creazione di `photo.txt` e `song.txt`:
+
+```bash
+# Su Linux/Mac
+./scan.sh
+
+# Su Windows con Git Bash
+"C:\Program Files\Git\bin\bash.exe" ./scan.sh
+```
+
+**Funzionalità:**
+- 🔄 Rinomina automaticamente `list.txt` → `photo.txt`
+- 📸 Scansiona tutte le immagini e genera `photo.txt`
+- 🎵 Scansiona tutti i file audio e genera `song.txt`
+- 📊 Mostra statistiche dettagliate
+
+Vedi [SCAN_SCRIPT.md](SCAN_SCRIPT.md) per la documentazione completa.
+
+## 🚀 Script di Deploy
+
+### deploy.sh / deploy.ps1 - Deploy Automatico
+
+Gli script di deploy automatizzano il processo di commit e push con versioning incrementale:
+
+```bash
+# Su Linux/Mac
+./deploy.sh
+
+# Su Windows PowerShell
+.\deploy.ps1
+
+# Su Windows con Git Bash
+"C:\Program Files\Git\bin\bash.exe" ./deploy.sh
+```
+
+**Funzionalità:**
+- 🔢 Versioning automatico incrementale (`rev 1`, `rev 2`, `rev 3`...)
+- 🔍 Controlli intelligenti (repository Git, modifiche presenti)
+- 📊 Output dettagliato con feedback colorato
+- 🛡️ Gestione errori robusta
+
+**Processo automatico:**
+1. `git add .`
+2. `git commit -m "rev X"` (X = versione precedente + 1)
+3. `git push`
+4. `git status`
+
+Vedi [DEPLOY_SCRIPTS.md](DEPLOY_SCRIPTS.md) per la documentazione completa. ma può richiedere tempo
 
 ### Problemi di zoom su mobile
 

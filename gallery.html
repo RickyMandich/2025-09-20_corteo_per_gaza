@@ -421,12 +421,155 @@
         .carousel-track.zoom-active {
             touch-action: none;
         }
+
+        /* Audio Controls Styles */
+        .audio-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .audio-controls:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .audio-btn {
+            background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+        }
+
+        .audio-btn:active {
+            transform: scale(0.95);
+        }
+
+        .audio-btn.playing {
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-icon {
+            color: #4fc3f7;
+            font-size: 14px;
+        }
+
+        .audio-info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 768px) {
+            .audio-controls {
+                top: 10px;
+                right: 10px;
+                padding: 8px;
+                gap: 8px;
+            }
+
+            .audio-info {
+                display: none;
+            }
+
+            .volume-control {
+                gap: 5px;
+            }
+
+            .audio-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .volume-slider {
+                width: 60px;
+            }
+        }
     </style>
 </head>
 <body>
     <button class="back-button" onclick="window.location.href='index.html'">
         <i class="fas fa-arrow-left"></i>
     </button>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls" id="audioControls" style="display: none;">
+        <button class="audio-btn" id="playPauseBtn" title="Play/Pause">
+            <i class="fas fa-play"></i>
+        </button>
+        <div class="volume-control">
+            <i class="fas fa-volume-up volume-icon"></i>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+        </div>
+        <div class="audio-info" id="audioInfo">Nessun audio</div>
+    </div>
 
     <div class="container-fluid main-container">
         <div class="row">
@@ -495,6 +638,234 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
+        class AudioManager {
+            constructor(folderPath) {
+                this.folderPath = folderPath;
+                this.audioFiles = [];
+                this.currentAudio = null;
+                this.currentIndex = 0;
+                this.isPlaying = false;
+                this.volume = 0.5;
+
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.loadAudioList();
+                    if (this.audioFiles.length > 0) {
+                        this.setupUI();
+                        this.playRandomSong();
+                    }
+                } catch (error) {
+                    console.log('Nessun file audio disponibile:', error.message);
+                    // Mostra comunque i controlli anche se non ci sono file audio
+                    this.setupUI();
+                }
+            }
+
+            async loadAudioList() {
+                try {
+                    const response = await fetch(`${this.folderPath}/song.txt`);
+                    if (!response.ok) {
+                        throw new Error('File song.txt non trovato');
+                    }
+
+                    const songList = await response.text();
+                    const allFiles = songList.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+
+                    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.MP3', '.WAV', '.OGG', '.M4A', '.AAC'];
+
+                    this.audioFiles = allFiles.filter(fileName => {
+                        return audioExtensions.some(ext => fileName.endsWith(ext));
+                    }).map(fileName => `${this.folderPath}/${fileName}`);
+
+                    console.log(`Trovati ${this.audioFiles.length} file audio`);
+
+                    if (this.audioFiles.length === 0) {
+                        throw new Error('Nessun file audio valido trovato in song.txt');
+                    }
+
+                } catch (error) {
+                    console.error('Errore nel caricamento audio:', error);
+                    throw error;
+                }
+            }
+
+            getRandomIndex() {
+                return Math.floor(Math.random() * this.audioFiles.length);
+            }
+
+            async playRandomSong() {
+                if (this.audioFiles.length === 0) return;
+
+                this.currentIndex = this.getRandomIndex();
+                await this.playSong(this.currentIndex);
+            }
+
+            async playSong(index) {
+                if (index < 0 || index >= this.audioFiles.length) return;
+
+                const audioFile = this.audioFiles[index];
+
+                // Ferma l'audio corrente se presente
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio = null;
+                }
+
+                try {
+                    this.currentAudio = new Audio(audioFile);
+                    this.currentAudio.volume = this.volume;
+                    this.currentAudio.loop = false;
+
+                    // Gestisce la fine della canzone
+                    this.currentAudio.addEventListener('ended', () => {
+                        this.playRandomSong();
+                    });
+
+                    // Gestisce errori di caricamento
+                    this.currentAudio.addEventListener('error', (e) => {
+                        console.error(`Errore nel caricamento di ${audioFile}:`, e);
+                        this.handleAudioError(audioFile);
+                    });
+
+                    await this.currentAudio.play();
+                    this.isPlaying = true;
+                    console.log(`Riproduzione: ${audioFile.split('/').pop()}`);
+
+                    // Aggiorna UI
+                    this.updatePlayPauseButton();
+                    this.updateAudioInfo();
+
+                } catch (error) {
+                    console.error(`Errore nella riproduzione di ${audioFile}:`, error);
+                    // Prova con un'altra canzone se questa fallisce
+                    this.playRandomSong();
+                }
+            }
+
+            togglePlayPause() {
+                if (!this.currentAudio) return;
+
+                if (this.isPlaying) {
+                    this.currentAudio.pause();
+                    this.isPlaying = false;
+                } else {
+                    this.currentAudio.play();
+                    this.isPlaying = true;
+                }
+                this.updatePlayPauseButton();
+            }
+
+            setVolume(volume) {
+                this.volume = Math.max(0, Math.min(1, volume));
+                if (this.currentAudio) {
+                    this.currentAudio.volume = this.volume;
+                }
+            }
+
+            stop() {
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio = null;
+                    this.isPlaying = false;
+                }
+            }
+
+            setupUI() {
+                const audioControls = document.getElementById('audioControls');
+                const playPauseBtn = document.getElementById('playPauseBtn');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const audioInfo = document.getElementById('audioInfo');
+
+                // Mostra sempre i controlli, anche se non ci sono file audio
+                audioControls.style.display = 'flex';
+
+                // Setup play/pause button
+                playPauseBtn.addEventListener('click', () => {
+                    if (this.audioFiles.length > 0) {
+                        this.togglePlayPause();
+                        this.updatePlayPauseButton();
+                    }
+                });
+
+                // Setup volume slider
+                volumeSlider.addEventListener('input', (e) => {
+                    this.setVolume(e.target.value / 100);
+                });
+
+                // Update UI initially
+                this.updatePlayPauseButton();
+                this.updateAudioInfo();
+
+                // Disabilita i controlli se non ci sono file audio
+                if (this.audioFiles.length === 0) {
+                    playPauseBtn.disabled = true;
+                    playPauseBtn.style.opacity = '0.5';
+                    playPauseBtn.style.cursor = 'not-allowed';
+                }
+            }
+
+            updatePlayPauseButton() {
+                const playPauseBtn = document.getElementById('playPauseBtn');
+                const icon = playPauseBtn.querySelector('i');
+
+                if (this.isPlaying) {
+                    icon.className = 'fas fa-pause';
+                    playPauseBtn.classList.add('playing');
+                    playPauseBtn.title = 'Pause';
+                } else {
+                    icon.className = 'fas fa-play';
+                    playPauseBtn.classList.remove('playing');
+                    playPauseBtn.title = 'Play';
+                }
+            }
+
+            updateAudioInfo() {
+                const audioInfo = document.getElementById('audioInfo');
+                if (this.currentAudio && this.audioFiles.length > 0) {
+                    const fileName = this.audioFiles[this.currentIndex].split('/').pop();
+                    audioInfo.textContent = fileName;
+                } else if (this.audioFiles.length > 0) {
+                    audioInfo.textContent = `${this.audioFiles.length} brani disponibili`;
+                } else {
+                    audioInfo.textContent = 'Nessun audio';
+                }
+            }
+
+            handleAudioError(failedFile) {
+                // Rimuovi il file problematico dalla lista
+                const failedIndex = this.audioFiles.indexOf(failedFile);
+                if (failedIndex > -1) {
+                    this.audioFiles.splice(failedIndex, 1);
+                    console.log(`Rimosso file audio non funzionante: ${failedFile}`);
+                }
+
+                // Se ci sono ancora file disponibili, prova con un altro
+                if (this.audioFiles.length > 0) {
+                    this.playRandomSong();
+                } else {
+                    console.log('Nessun file audio funzionante disponibile');
+                    this.updateAudioInfo();
+                    this.isPlaying = false;
+                    this.updatePlayPauseButton();
+                }
+            }
+
+            // Metodo per verificare se un file audio esiste
+            async checkAudioFile(audioFile) {
+                try {
+                    const response = await fetch(audioFile, { method: 'HEAD' });
+                    return response.ok;
+                } catch (error) {
+                    return false;
+                }
+            }
+        }
+
         class PhotoGallery {
             constructor() {
                 this.photos = [];
@@ -508,6 +879,7 @@
                 this.isZooming = false;
                 this.lastTouchDistance = 0;
                 this.folderPath = '';
+                this.audioManager = null;
 
                 this.init();
             }
@@ -522,6 +894,9 @@
                     this.startAutoPlay();
                     this.hideLoading();
                     this.updateTitle();
+
+                    // Inizializza l'audio manager
+                    this.audioManager = new AudioManager(this.folderPath);
                 } catch (error) {
                     console.error('Errore durante l\'inizializzazione:', error);
                     this.showError();
@@ -556,9 +931,9 @@
 
             async loadPhotos() {
                 try {
-                    const response = await fetch(`${this.folderPath}/list.txt`);
+                    const response = await fetch(`${this.folderPath}/photo.txt`);
                     if (!response.ok) {
-                        throw new Error('File list.txt non trovato');
+                        throw new Error('File photo.txt non trovato');
                     }
 
                     const fileList = await response.text();
@@ -569,7 +944,7 @@
                     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
 
                     this.photos = allFiles.filter(fileName => {
-                        if (fileName === 'index.htm' || fileName === 'index.html' || fileName === 'list.txt') {
+                        if (fileName === 'index.htm' || fileName === 'index.html' || fileName === 'photo.txt' || fileName === 'song.txt') {
                             return false;
                         }
                         return imageExtensions.some(ext => fileName.endsWith(ext));

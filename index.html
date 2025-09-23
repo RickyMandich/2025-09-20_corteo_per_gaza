@@ -265,7 +265,7 @@
             }
 
             async loadGalleries() {
-                // Rileva automaticamente tutte le cartelle con list.txt
+                // Rileva automaticamente tutte le cartelle con photo.txt
                 const potentialFolders = await this.discoverFolders();
 
                 for (const dir of potentialFolders) {
@@ -285,7 +285,7 @@
                 }
 
                 if (this.galleries.length === 0) {
-                    throw new Error('Nessuna galleria trovata. Crea cartelle con foto e file list.txt');
+                    throw new Error('Nessuna galleria trovata. Crea cartelle con foto e file photo.txt');
                 }
             }
 
@@ -304,12 +304,12 @@
                 // Controlla ogni cartella configurata
                 for (const folder of galleryFolders) {
                     try {
-                        const response = await fetch(`${folder}/list.txt`, { method: 'HEAD' });
+                        const response = await fetch(`${folder}/photo.txt`, { method: 'HEAD' });
                         if (response.ok) {
                             foundFolders.push(folder);
                         }
                     } catch (error) {
-                        console.log(`Cartella ${folder} non trovata o senza list.txt`);
+                        console.log(`Cartella ${folder} non trovata o senza photo.txt`);
                     }
                 }
 
@@ -331,17 +331,17 @@
 
             async countPhotosInDirectory(dirPath) {
                 try {
-                    const response = await fetch(`${dirPath}/list.txt`);
+                    const response = await fetch(`${dirPath}/photo.txt`);
                     if (!response.ok) {
                         return 0;
                     }
-                    
+
                     const fileList = await response.text();
                     const files = fileList.split('\n')
                         .map(line => line.trim())
                         .filter(line => line.length > 0);
-                    
-                    const excludeFiles = ['index.htm', 'index.html', 'list.txt'];
+
+                    const excludeFiles = ['index.htm', 'index.html', 'photo.txt', 'song.txt'];
                     const supportedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.JPEG', '.PNG', '.GIF', '.WEBP'];
 
                     return files.filter(fileName => {
@@ -431,7 +431,7 @@
                     let processedPhotos = 0;
 
                     // Carica la lista delle foto
-                    const response = await fetch(`${gallery.path}/list.txt`);
+                    const response = await fetch(`${gallery.path}/photo.txt`);
                     const listText = await response.text();
                     const photoFiles = listText.trim().split('\n').filter(file => file.trim());
 
