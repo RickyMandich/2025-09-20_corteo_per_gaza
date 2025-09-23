@@ -842,6 +842,13 @@
 
         class PhotoGallery {
             constructor() {
+                console.log('=== COSTRUTTORE PhotoGallery ===');
+
+                // Verifica che la classe sia chiamata correttamente
+                if (!(this instanceof PhotoGallery)) {
+                    throw new Error('PhotoGallery deve essere chiamata con new');
+                }
+
                 this.photos = [];
                 this.currentIndex = 0;
                 this.isCarouselView = true;
@@ -855,6 +862,7 @@
                 this.folderPath = '';
                 this.audioManager = null;
 
+                console.log('Proprietà inizializzate, chiamata init()...');
                 this.init();
             }
 
@@ -890,15 +898,46 @@
             }
 
             getFolderFromURL() {
-                const urlParams = new URLSearchParams(window.location.search);
-                this.folderPath = urlParams.get('folder') || '';
+                console.log('=== PARSING URL ===');
+                console.log('window.location.href:', window.location.href);
+                console.log('window.location.search:', window.location.search);
+                console.log('window.location.pathname:', window.location.pathname);
+                console.log('window.location.hash:', window.location.hash);
 
-                console.log('URL completo:', window.location.href);
-                console.log('Parametri URL:', window.location.search);
-                console.log('Folder estratto:', this.folderPath);
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    console.log('URLSearchParams creato con successo');
 
-                if (!this.folderPath) {
-                    throw new Error('Parametro folder mancante nell\'URL. Assicurati che l\'URL contenga ?folder=nome-cartella');
+                    // Mostra tutti i parametri
+                    for (const [key, value] of urlParams.entries()) {
+                        console.log(`Parametro: ${key} = ${value}`);
+                    }
+
+                    this.folderPath = urlParams.get('folder') || '';
+                    console.log('Folder path estratto:', JSON.stringify(this.folderPath));
+                    console.log('Folder path length:', this.folderPath.length);
+
+                    if (!this.folderPath) {
+                        console.error('ERRORE: Parametro folder mancante!');
+                        console.error('URL attuale:', window.location.href);
+                        console.error('Search params:', window.location.search);
+                        throw new Error('Parametro folder mancante nell\'URL. Assicurati che l\'URL contenga ?folder=nome-cartella');
+                    }
+
+                    // Decodifica il path se necessario
+                    try {
+                        const decodedPath = decodeURIComponent(this.folderPath);
+                        console.log('Folder path decodificato:', JSON.stringify(decodedPath));
+                        this.folderPath = decodedPath;
+                    } catch (decodeError) {
+                        console.warn('Errore nella decodifica URL, uso il path originale:', decodeError);
+                    }
+
+                    console.log('Folder path finale:', JSON.stringify(this.folderPath));
+
+                } catch (error) {
+                    console.error('Errore nel parsing dell\'URL:', error);
+                    throw error;
                 }
             }
 
@@ -1258,25 +1297,81 @@
             }
         }
 
+        // Cattura tutti gli errori JavaScript non gestiti
+        window.addEventListener('error', (event) => {
+            console.error('Errore JavaScript non gestito:', event.error);
+            console.error('File:', event.filename);
+            console.error('Linea:', event.lineno);
+            console.error('Colonna:', event.colno);
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Promise rejection non gestita:', event.reason);
+        });
+
         // Inizializza la galleria quando la pagina è caricata
         function initGallery() {
-            console.log('Inizializzazione galleria...');
+            console.log('=== INIZIO INIZIALIZZAZIONE GALLERIA ===');
+            console.log('Timestamp:', new Date().toISOString());
             console.log('Document ready state:', document.readyState);
             console.log('URL corrente:', window.location.href);
+            console.log('User agent:', navigator.userAgent);
+
+            // Verifica che tutti gli elementi DOM necessari esistano
+            const requiredElements = [
+                'carouselView', 'gridView', 'carouselTrack',
+                'photoCounter', 'galleryTitle', 'loadingSpinner'
+            ];
+
+            for (const elementId of requiredElements) {
+                const element = document.getElementById(elementId);
+                if (!element) {
+                    console.error(`Elemento DOM mancante: ${elementId}`);
+                    return;
+                }
+                console.log(`✓ Elemento ${elementId} trovato`);
+            }
 
             try {
-                new PhotoGallery();
+                console.log('Creazione istanza PhotoGallery...');
+                const gallery = new PhotoGallery();
+                console.log('PhotoGallery creata con successo');
+                window.currentGallery = gallery; // Per debug
             } catch (error) {
-                console.error('Errore durante l\'inizializzazione della galleria:', error);
+                console.error('ERRORE durante l\'inizializzazione della galleria:', error);
+                console.error('Stack trace:', error.stack);
+
+                // Mostra errore visivo all'utente
+                const loading = document.getElementById('loadingSpinner');
+                if (loading) {
+                    loading.innerHTML = `
+                        <div class="text-center text-white">
+                            <i class="fas fa-exclamation-triangle mb-3" style="font-size: 48px; color: #ff6b6b;"></i>
+                            <h4>Errore di Inizializzazione</h4>
+                            <p>Si è verificato un errore durante il caricamento della galleria.</p>
+                            <p><small>Controlla la console per dettagli tecnici.</small></p>
+                            <button class="btn btn-outline-light mt-3" onclick="location.reload()">
+                                <i class="fas fa-redo me-2"></i>Ricarica Pagina
+                            </button>
+                            <button class="btn btn-outline-light mt-3 ms-2" onclick="window.location.href='index.html'">
+                                <i class="fas fa-arrow-left me-2"></i>Torna all'Indice
+                            </button>
+                        </div>
+                    `;
+                }
+
                 // Riprova dopo un breve delay
                 setTimeout(() => {
-                    console.log('Tentativo di reinizializzazione...');
+                    console.log('=== TENTATIVO DI REINIZIALIZZAZIONE ===');
                     try {
-                        new PhotoGallery();
+                        const retryGallery = new PhotoGallery();
+                        console.log('Reinizializzazione riuscita!');
+                        window.currentGallery = retryGallery;
                     } catch (retryError) {
-                        console.error('Errore anche nel secondo tentativo:', retryError);
+                        console.error('ERRORE anche nel secondo tentativo:', retryError);
+                        console.error('Stack trace retry:', retryError.stack);
                     }
-                }, 1000);
+                }, 2000);
             }
         }
 
