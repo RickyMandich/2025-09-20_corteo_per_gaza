@@ -420,6 +420,8 @@
                     // Click sulla card (escluso il pulsante download)
                     card.addEventListener('click', (e) => {
                         if (!e.target.closest('.gallery-download-btn')) {
+                            // Salva il folder nel sessionStorage per gestire i refresh
+                            sessionStorage.setItem('currentGalleryFolder', gallery.path);
                             window.location.href = `gallery.html?folder=${encodeURIComponent(gallery.path)}`;
                         }
                     });
