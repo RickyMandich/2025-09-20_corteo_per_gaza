@@ -17,6 +17,9 @@ processed_folders=0
 total_photos=0
 total_songs=0
 
+# Array per memorizzare le cartelle con foto
+galleries_with_photos=()
+
 echo -e "${BLUE}🔍 Gallery Scanner - Generazione automatica photo.txt e song.txt${NC}"
 echo "=================================================================="
 
@@ -65,6 +68,8 @@ process_folder() {
     if [[ -s photo.txt ]]; then
         sort photo.txt -o photo.txt
         echo -e "${GREEN}✅ Trovate ${photos_found} immagini → photo.txt${NC}"
+        # Aggiungi la cartella alla lista delle gallerie con foto
+        galleries_with_photos+=("$folder")
     else
         rm photo.txt
         echo -e "${YELLOW}⚠️  Nessuna immagine trovata${NC}"
@@ -133,6 +138,21 @@ main() {
         fi
     done
     
+    # Genera gallery.txt con l'elenco delle cartelle che contengono foto
+    echo -e "\n${BLUE}📝 Generazione gallery.txt...${NC}"
+    > gallery.txt
+
+    if [[ ${#galleries_with_photos[@]} -gt 0 ]]; then
+        for gallery in "${galleries_with_photos[@]}"; do
+            echo "$gallery" >> gallery.txt
+        done
+        sort gallery.txt -o gallery.txt
+        echo -e "${GREEN}✅ Generato gallery.txt con ${#galleries_with_photos[@]} gallerie${NC}"
+    else
+        rm -f gallery.txt
+        echo -e "${YELLOW}⚠️  Nessuna galleria con foto trovata - gallery.txt non creato${NC}"
+    fi
+
     # Statistiche finali
     echo ""
     echo "=================================================================="
@@ -142,6 +162,7 @@ main() {
     echo -e "   📁 Cartelle processate: ${GREEN}${processed_folders}${NC}/${total_folders}"
     echo -e "   🖼️  Immagini totali: ${GREEN}${total_photos}${NC}"
     echo -e "   🎵 File audio totali: ${GREEN}${total_songs}${NC}"
+    echo -e "   📋 Gallerie con foto: ${GREEN}${#galleries_with_photos[@]}${NC}"
     echo ""
     
     if [[ $processed_folders -eq $total_folders ]]; then
@@ -152,17 +173,23 @@ main() {
     
     echo ""
     echo -e "${BLUE}💡 PROSSIMI PASSI:${NC}"
-    echo "   1. Verifica i file photo.txt e song.txt generati"
+    echo "   1. Verifica i file photo.txt, song.txt e gallery.txt generati"
     echo "   2. Aggiungi eventuali file mancanti manualmente"
-    echo "   3. Testa la gallery nel browser"
+    echo "   3. Testa la gallery nel browser (ora con rilevamento automatico!)"
     echo ""
 }
 
-# Verifica che lo script sia eseguito dalla directory corretta
+# Verifica che lo script sia eseguito dalla directory corretta o dalla sottodirectory bash
 if [[ ! -f "gallery.html" ]] && [[ ! -f "index.html" ]]; then
-    echo -e "${RED}❌ Errore: Esegui questo script dalla directory principale del progetto${NC}"
-    echo -e "${YELLOW}💡 La directory dovrebbe contenere gallery.html o index.html${NC}"
-    exit 1
+    # Se siamo nella directory bash, spostiamoci nella directory padre
+    if [[ -f "../gallery.html" ]] || [[ -f "../index.html" ]]; then
+        echo -e "${BLUE}📁 Rilevata esecuzione da directory bash, spostandosi nella directory principale...${NC}"
+        cd ..
+    else
+        echo -e "${RED}❌ Errore: Esegui questo script dalla directory principale del progetto o dalla directory bash${NC}"
+        echo -e "${YELLOW}💡 La directory dovrebbe contenere gallery.html o index.html${NC}"
+        exit 1
+    fi
 fi
 
 

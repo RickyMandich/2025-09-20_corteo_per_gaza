@@ -34,21 +34,22 @@ Un sistema completo e automatizzato per creare e gestire gallerie fotografiche c
 
 ## 🚀 Guida Rapida
 
-### Metodo 1: Automatico (Consigliato)
+### Metodo 1: Completamente Automatico (Consigliato)
 
 1. **Crea cartella** con foto e file audio (opzionali)
 2. **Esegui scansione automatica**:
    ```bash
-   chmod +x scan.sh
-   ./scan.sh
+   # Su Linux/Mac dalla directory principale
+   chmod +x bash/scan.sh
+   cd bash && ./scan.sh
+
+   # Su Windows dalla directory bash
+   cd bash
+   & "C:\Program Files\Git\bin\bash.exe" ./scan.sh
    ```
-3. **Aggiungi cartella** alla lista in `index.html`:
-   ```javascript
-   const galleryFolders = [
-       '2025-09-20 corteo per gaza (blocco della vempa) filtrato',
-       'nome-nuova-cartella', // ← Aggiungi qui
-   ];
-   ```
+3. **✨ NESSUNA configurazione manuale necessaria!**
+   - Lo script genera automaticamente `gallery.txt` con l'elenco delle gallerie
+   - L'index.html legge automaticamente da `gallery.txt`
 4. **Deploy automatico**:
    ```bash
    ./deploy.sh  # Linux/Mac
@@ -94,9 +95,26 @@ Un sistema completo e automatizzato per creare e gestire gallerie fotografiche c
 - **Rinominazione automatica** da `list.txt` a `photo.txt`
 - **Statistiche dettagliate** di elaborazione
 
+## 🎯 Sistema Completamente Automatico
+
+### 🚀 Rilevamento Automatico delle Gallerie
+
+Il sistema ora è **completamente automatico**! Non è più necessario aggiornare manualmente la lista delle gallerie in `index.html`.
+
+**Come funziona:**
+1. Lo script `scan.sh` genera automaticamente il file `gallery.txt`
+2. L'`index.html` legge automaticamente da `gallery.txt`
+3. Ogni nuova cartella con foto viene rilevata automaticamente
+
+**Vantaggi:**
+- ✅ **Zero configurazione manuale** dell'index
+- ✅ **Aggiunta gallerie istantanea** - basta eseguire lo script
+- ✅ **Sincronizzazione automatica** tra cartelle e index
+- ✅ **Fallback intelligente** se `gallery.txt` non esiste
+
 ## 🔍 Script di Automazione
 
-### 📋 scan.sh - Scansione Automatica
+### 📋 scan.sh - Scansione Automatica Completa
 
 Lo script `scan.sh` automatizza completamente la generazione dei file `photo.txt` e `song.txt`:
 
@@ -113,8 +131,10 @@ chmod +x scan.sh
 - 🔄 **Rinomina automaticamente** `list.txt` → `photo.txt`
 - 📸 **Scansiona immagini**: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp` (e maiuscole)
 - 🎵 **Scansiona audio**: `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac` (e maiuscole)
+- 📋 **Genera gallery.txt**: Lista automatica delle gallerie per l'index
 - 📊 **Statistiche dettagliate** per ogni cartella processata
 - ⚡ **Performance elevata**: ~1000 file/secondo
+- 🎯 **Zero configurazione**: Elimina la necessità di aggiornare manualmente l'index
 
 **Output esempio:**
 ```
@@ -124,6 +144,9 @@ chmod +x scan.sh
 ✅ Trovate 150 immagini → photo.txt
 ✅ Trovati 3 file audio → song.txt
 📊 Cartella completata: 150 foto, 3 audio
+
+📝 Generazione gallery.txt...
+✅ Generato gallery.txt con 1 gallerie
 ```
 
 ### 🚀 deploy.sh / deploy.ps1 - Deploy Automatico
@@ -348,24 +371,24 @@ Il sistema usa Bootstrap 5.3 con un tema dark personalizzato. Per modificare i c
 
 ## 🎯 Workflow Completo
 
-### Workflow Automatico (Consigliato)
+### Workflow Completamente Automatico (Consigliato)
 
 ```bash
 # 1. Crea cartella con foto e audio
 mkdir "2025-09-22 nuovo evento filtrato"
 # Aggiungi foto e file audio...
 
-# 2. Scansione automatica
-./scan.sh
+# 2. Scansione automatica (genera tutto automaticamente!)
+cd bash && ./scan.sh
 
-# 3. Aggiungi alla configurazione in index.html
-# Modifica la sezione galleryFolders
+# 3. ✨ NESSUNA configurazione manuale necessaria!
+# Lo script ha già generato gallery.txt e l'index lo leggerà automaticamente
 
 # 4. Deploy automatico
 ./deploy.sh
 ```
 
-### Workflow Manuale
+### Workflow Manuale (Solo se necessario)
 
 ```bash
 # 1. Crea cartella con foto
@@ -376,8 +399,10 @@ cd "2025-09-22 nuovo evento filtrato"
 ls *.JPG > photo.txt
 ls *.mp3 > song.txt  # Opzionale per audio
 
-# 3. Aggiungi alla configurazione
-# Modifica index.html
+# 3. Aggiorna gallery.txt manualmente
+cd ..
+echo "2025-09-22 nuovo evento filtrato" >> gallery.txt
+sort gallery.txt -o gallery.txt
 
 # 4. Push manuale
 git add .
@@ -401,11 +426,12 @@ git push
 ### Vantaggi del Sistema
 
 - ✅ **Zero configurazione manuale** con gli script di automazione
+- ✅ **Rilevamento automatico gallerie** tramite `gallery.txt`
 - ✅ **Versioning automatico** per tracking delle modifiche
 - ✅ **Gestione errori robusta** in tutti i componenti
 - ✅ **Performance ottimale** con lazy loading e ottimizzazioni
 - ✅ **Esperienza utente superiore** su mobile e desktop
-- ✅ **Manutenzione minima** grazie all'automazione
+- ✅ **Manutenzione minima** grazie all'automazione completa
 
 ## 📋 Estensioni Supportate
 
