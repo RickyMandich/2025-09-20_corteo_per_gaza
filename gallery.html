@@ -161,33 +161,7 @@
             right: 20px;
         }
 
-        .carousel-indicators {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-            max-width: 80%;
-            overflow-x: auto;
-            padding: 10px;
-        }
 
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .indicator.active {
-            background: #4fc3f7;
-            transform: scale(1.2);
-        }
 
         /* Stili Griglia Migliorati */
         .grid-container {
@@ -610,9 +584,7 @@
                 <i class="fas fa-chevron-right"></i>
             </button>
             
-            <div class="carousel-indicators" id="indicators">
-                <!-- Gli indicatori verranno inseriti dinamicamente qui -->
-            </div>
+
 
             <div class="photo-counter" id="photoCounter">
                 1 / 0
@@ -1021,11 +993,9 @@
 
             renderCarousel() {
                 const track = document.getElementById('carouselTrack');
-                const indicators = document.getElementById('indicators');
                 const counter = document.getElementById('photoCounter');
 
                 track.innerHTML = '';
-                indicators.innerHTML = '';
 
                 this.photos.forEach((photo, index) => {
                     // Carousel items
@@ -1033,12 +1003,6 @@
                     item.className = 'carousel-item';
                     item.innerHTML = `<img src="${photo}" alt="Foto ${index + 1}" loading="lazy">`;
                     track.appendChild(item);
-
-                    // Indicators
-                    const indicator = document.createElement('div');
-                    indicator.className = 'indicator';
-                    indicator.addEventListener('click', () => this.goToPhoto(index));
-                    indicators.appendChild(indicator);
                 });
 
                 this.updateCarousel();
@@ -1067,7 +1031,6 @@
 
             updateCarousel() {
                 const items = document.querySelectorAll('.carousel-item');
-                const indicators = document.querySelectorAll('.indicator');
                 const counter = document.getElementById('photoCounter');
 
                 items.forEach((item, index) => {
@@ -1080,10 +1043,6 @@
                     } else if (index === this.getNextIndex()) {
                         item.classList.add('next');
                     }
-                });
-
-                indicators.forEach((indicator, index) => {
-                    indicator.classList.toggle('active', index === this.currentIndex);
                 });
 
                 counter.textContent = `${this.currentIndex + 1} / ${this.photos.length}`;
