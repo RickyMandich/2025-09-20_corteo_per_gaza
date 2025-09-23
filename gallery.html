@@ -1234,31 +1234,38 @@
             }
         }
 
-        // Inizializza la galleria quando la pagina è caricata (v2.0)
-        document.addEventListener('DOMContentLoaded', () => {
-            // Verifica se siamo su GitHub Pages e se c'è un problema con l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const folder = urlParams.get('folder');
+        // Gestione errori globali
+        window.addEventListener('error', (event) => {
+            console.error('Errore JavaScript:', event.error);
+            console.error('File:', event.filename);
+            console.error('Linea:', event.lineno);
+        });
 
-            if (!folder) {
-                // Se non c'è il parametro folder, potrebbe essere un problema di refresh
-                // Prova a recuperarlo dal sessionStorage se disponibile
-                const savedFolder = sessionStorage.getItem('currentGalleryFolder');
-                if (savedFolder) {
-                    // Reindirizza con il parametro corretto
-                    window.location.href = `gallery.html?folder=${encodeURIComponent(savedFolder)}`;
-                    return;
-                } else {
-                    // Se non abbiamo nessuna informazione, torna all'index
-                    window.location.href = 'index.html';
-                    return;
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Promise rejection:', event.reason);
+        });
+
+        // Inizializza la galleria quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                new PhotoGallery();
+            } catch (error) {
+                console.error('Errore critico nell\'inizializzazione:', error);
+                // Mostra un messaggio di errore all'utente
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.innerHTML = `
+                        <div class="text-center text-white">
+                            <i class="fas fa-exclamation-triangle mb-3" style="font-size: 48px; color: #ff6b6b;"></i>
+                            <h4>Errore di Caricamento</h4>
+                            <p>Si è verificato un errore durante l'inizializzazione della galleria.</p>
+                            <button class="btn btn-outline-light mt-3" onclick="window.location.href='index.html'">
+                                <i class="fas fa-arrow-left me-2"></i>Torna all'Indice
+                            </button>
+                        </div>
+                    `;
                 }
             }
-
-            // Salva il folder corrente per eventuali refresh futuri
-            sessionStorage.setItem('currentGalleryFolder', folder);
-
-            new PhotoGallery();
         });
     </script>
 </body>
