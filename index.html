@@ -328,12 +328,7 @@
 
                 // 🔄 FALLBACK: Configurazione manuale (se gallery.txt non esiste)
                 console.log('📁 Usando configurazione manuale di fallback');
-                const fallbackFolders = [
-                    '2025-09-20 corteo per gaza (blocco della vempa) filtrato',
-                    // Aggiungi nuove cartelle qui sotto se gallery.txt non funziona:
-                    // '2025-09-22 nuovo evento filtrato',
-                    // '2025-09-25 festa compleanno filtrato',
-                ];
+                const fallbackFolders = [];
 
                 const foundFolders = [];
 
@@ -354,8 +349,6 @@
 
             formatDisplayName(dirName) {
                 return dirName
-                    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '') // Rimuove data
-                    .replace(/\s*filtrato\s*$/i, '') // Rimuove "filtrato"
                     .replace(/\s+/g, ' ')
                     .trim()
                     .split(' ')
