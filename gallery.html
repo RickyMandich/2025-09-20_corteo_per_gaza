@@ -638,7 +638,9 @@
 
             async loadAudioList() {
                 try {
-                    const response = await fetch(`${this.folderPath}/song.txt`);
+                    // Aggiungi un timestamp per evitare problemi di cache
+                    const cacheBuster = new Date().getTime();
+                    const response = await fetch(`${this.folderPath}/song.txt?t=${cacheBuster}`);
                     if (!response.ok) {
                         throw new Error('File song.txt non trovato');
                     }
@@ -858,8 +860,14 @@
 
             async init() {
                 try {
+                    console.log('Inizio inizializzazione PhotoGallery...');
+
                     this.getFolderFromURL();
+                    console.log('Folder path estratto:', this.folderPath);
+
                     await this.loadPhotos();
+                    console.log('Foto caricate:', this.photos.length);
+
                     this.setupEventListeners();
                     this.renderCarousel();
                     this.renderGrid();
@@ -869,8 +877,14 @@
 
                     // Inizializza l'audio manager
                     this.audioManager = new AudioManager(this.folderPath);
+
+                    // Segna la galleria come inizializzata
+                    window.galleryInitialized = true;
+                    console.log('PhotoGallery inizializzata con successo!');
+
                 } catch (error) {
                     console.error('Errore durante l\'inizializzazione:', error);
+                    window.galleryInitialized = false;
                     this.showError();
                 }
             }
@@ -878,8 +892,13 @@
             getFolderFromURL() {
                 const urlParams = new URLSearchParams(window.location.search);
                 this.folderPath = urlParams.get('folder') || '';
+
+                console.log('URL completo:', window.location.href);
+                console.log('Parametri URL:', window.location.search);
+                console.log('Folder estratto:', this.folderPath);
+
                 if (!this.folderPath) {
-                    throw new Error('Parametro folder mancante nell\'URL');
+                    throw new Error('Parametro folder mancante nell\'URL. Assicurati che l\'URL contenga ?folder=nome-cartella');
                 }
             }
 
@@ -903,9 +922,14 @@
 
             async loadPhotos() {
                 try {
-                    const response = await fetch(`${this.folderPath}/photo.txt`);
+                    console.log(`Tentativo di caricamento da: ${this.folderPath}/photo.txt`);
+
+                    // Aggiungi un timestamp per evitare problemi di cache
+                    const cacheBuster = new Date().getTime();
+                    const response = await fetch(`${this.folderPath}/photo.txt?t=${cacheBuster}`);
+
                     if (!response.ok) {
-                        throw new Error('File photo.txt non trovato');
+                        throw new Error(`File photo.txt non trovato nella cartella "${this.folderPath}". Status: ${response.status}`);
                     }
 
                     const fileList = await response.text();
@@ -1235,8 +1259,58 @@
         }
 
         // Inizializza la galleria quando la pagina è caricata
-        document.addEventListener('DOMContentLoaded', () => {
-            new PhotoGallery();
+        function initGallery() {
+            console.log('Inizializzazione galleria...');
+            console.log('Document ready state:', document.readyState);
+            console.log('URL corrente:', window.location.href);
+
+            try {
+                new PhotoGallery();
+            } catch (error) {
+                console.error('Errore durante l\'inizializzazione della galleria:', error);
+                // Riprova dopo un breve delay
+                setTimeout(() => {
+                    console.log('Tentativo di reinizializzazione...');
+                    try {
+                        new PhotoGallery();
+                    } catch (retryError) {
+                        console.error('Errore anche nel secondo tentativo:', retryError);
+                    }
+                }, 1000);
+            }
+        }
+
+        // Gestione multipla degli eventi di caricamento per maggiore robustezza
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGallery);
+        } else {
+            // Il documento è già caricato
+            initGallery();
+        }
+
+        // Fallback aggiuntivo
+        window.addEventListener('load', () => {
+            console.log('Window load event triggered');
+            // Verifica se la galleria è già stata inizializzata
+            if (!window.galleryInitialized) {
+                console.log('Galleria non ancora inizializzata, inizializzazione tramite window.load');
+                initGallery();
+            }
+        });
+
+        // Gestione del refresh della pagina
+        window.addEventListener('beforeunload', () => {
+            console.log('Pagina in fase di chiusura/refresh');
+            window.galleryInitialized = false;
+        });
+
+        // Gestione del focus della finestra (quando torni alla tab)
+        window.addEventListener('focus', () => {
+            console.log('Finestra ha ricevuto il focus');
+            if (!window.galleryInitialized) {
+                console.log('Reinizializzazione dopo focus');
+                setTimeout(initGallery, 100);
+            }
         });
     </script>
 </body>
